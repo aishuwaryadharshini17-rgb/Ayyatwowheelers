@@ -19,7 +19,7 @@
         </nav>
         <div class="header-actions">
             <button class="lang-toggle" type="button" data-language-toggle>தமிழ்</button>
-            <a href="tel:7540081247" class="book-btn">Call Now</a>
+            <a href="booking.html" class="book-btn">Book a Service</a>
         </div>
     </header>
 
@@ -28,27 +28,68 @@
             <div>
                 <span>Booking</span>
                 <h1>Book a service slot.</h1>
-                <p>Share your bike details and preferred timing. For urgent repair or same-day service, calling is the fastest option.</p>
+                <p>Share your bike details and preferred timing. Booking support is available within 2 km around our workshop location.</p>
+                <div class="booking-radius">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Available for customers within 2 km of Jeyam complex, Podhumbu main road, Prc colony 2 street, Madurai-18.</span>
+                </div>
                 <a class="inline-call" href="tel:7540081247"><i class="fa-solid fa-phone"></i> 7540081247</a>
             </div>
-            <form class="contact-form">
-                <input type="text" placeholder="Full name" aria-label="Full name">
-                <input type="tel" placeholder="Phone number" aria-label="Phone number">
-                <input type="text" placeholder="Bike / scooter model" aria-label="Bike or scooter model">
-                <select aria-label="Preferred service">
+            <form class="contact-form" data-booking-form>
+                <input type="text" name="fullName" placeholder="Full name" aria-label="Full name" required>
+                <input type="tel" name="phoneNumber" placeholder="Phone number" aria-label="Phone number" required>
+                <input type="text" name="pickupLocation" placeholder="Pickup location within 2 km" aria-label="Pickup location within 2 km" required>
+                <input type="text" name="bikeModel" placeholder="Bike / scooter model" aria-label="Bike or scooter model" required>
+                <select name="preferredService" aria-label="Preferred service">
                     <option>General service</option>
                     <option>Oil change</option>
                     <option>Brake service</option>
                     <option>Electrical repair</option>
                     <option>Engine repair</option>
                 </select>
-                <textarea placeholder="Preferred date, time, and issue" aria-label="Preferred date time and issue"></textarea>
+                <textarea name="serviceDetails" placeholder="Preferred date, time, and issue" aria-label="Preferred date time and issue" required></textarea>
                 <button type="submit">Request Booking</button>
             </form>
+        </section>
+
+        <section class="final-cta">
+            <div class="final-cta-inner">
+                <div class="final-cta-copy">
+                    <span><i class="fa-solid fa-fire-flame-curved"></i> Ready for service?</span>
+                    <h2>Your bike deserves the right care.</h2>
+                    <p>Book your service and keep your ride ready for the road. Workshop booking support is available within 2 km around our location.</p>
+                </div>
+                <div class="final-cta-actions">
+                    <a class="primary" href="booking.html"><i class="fa-solid fa-calendar-check"></i> Book a Service</a>
+                    <a class="secondary" href="contact.html"><i class="fa-solid fa-location-crosshairs"></i> Track Service</a>
+                </div>
+            </div>
         </section>
     </main>
 
     <footer class="site-footer simple-footer"><p>&copy; 2026 Ayya Two Wheelers Workshop. All rights reserved.</p></footer>
+    <script>
+        const bookingForm = document.querySelector("[data-booking-form]");
+
+        bookingForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(bookingForm);
+            const message = [
+                "New service booking request",
+                "",
+                `Name: ${formData.get("fullName")}`,
+                `Phone: ${formData.get("phoneNumber")}`,
+                `Pickup location: ${formData.get("pickupLocation")}`,
+                `Bike / scooter model: ${formData.get("bikeModel")}`,
+                `Preferred service: ${formData.get("preferredService")}`,
+                `Preferred date, time, and issue: ${formData.get("serviceDetails")}`
+            ].join("\n");
+
+            const whatsappUrl = `https://wa.me/916383986697?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, "_blank");
+        });
+    </script>
     <script src="js/language.js"></script>
 </body>
 </html>
