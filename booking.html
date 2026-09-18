@@ -18,8 +18,8 @@
             <a href="contact.html">Contact</a>
         </nav>
         <div class="header-actions">
-            <button class="lang-toggle" type="button" data-language-toggle>தமிழ்</button>
-            <a href="booking.html" class="book-btn">Book a Service</a>
+            <button class="lang-toggle" type="button" data-language-toggle>TN</button>
+            <a href="admin/login.html" class="admin-login-btn">Admin Login</a>
         </div>
     </header>
 
@@ -36,10 +36,8 @@
                 <a class="inline-call" href="tel:7540081247"><i class="fa-solid fa-phone"></i> 7540081247</a>
             </div>
             <form class="contact-form" data-booking-form>
-                <input type="text" name="fullName" placeholder="Full name" aria-label="Full name" required>
+                <input type="text" name="fullName" placeholder="Your name" aria-label="Your name" required>
                 <input type="tel" name="phoneNumber" placeholder="Phone number" aria-label="Phone number" required>
-                <input type="text" name="pickupLocation" placeholder="Pickup location within 2 km" aria-label="Pickup location within 2 km" required>
-                <input type="text" name="bikeModel" placeholder="Bike / scooter model" aria-label="Bike or scooter model" required>
                 <select name="preferredService" aria-label="Preferred service">
                     <option>General service</option>
                     <option>Oil change</option>
@@ -47,8 +45,8 @@
                     <option>Electrical repair</option>
                     <option>Engine repair</option>
                 </select>
-                <textarea name="serviceDetails" placeholder="Preferred date, time, and issue" aria-label="Preferred date time and issue" required></textarea>
-                <button type="submit">Request Booking</button>
+                <textarea name="serviceDetails" placeholder="Bike model and service details" aria-label="Service details" required></textarea>
+                <button type="submit">Send Enquiry</button>
             </form>
         </section>
 
@@ -67,28 +65,139 @@
         </section>
     </main>
 
-    <footer class="site-footer simple-footer"><p>&copy; 2026 Ayya Two Wheelers Workshop. All rights reserved.</p></footer>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.html" class="footer-logo">
+                    <img src="image/logo.png" alt="Ayya Two Wheelers Workshop">
+                </a>
+                <p>
+                    Madurai's trusted two wheeler service workshop. We make bike servicing simple,
+                    transparent, and reliable.
+                </p>
+                <div class="social-links" aria-label="Social media links">
+                    <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="https://wa.me/916383986697" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <a href="index.html">Home</a>
+                <a href="services.html">Services</a>
+                <a href="about.html">About</a>
+                <a href="gallery.html">Gallery</a>
+                <a href="booking.html">Booking</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Support</h3>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Return Policy</a>
+                <a href="contact.html">Contact Us</a>
+            </div>
+
+            <div class="footer-column footer-contact">
+                <h3>Contact</h3>
+                <p><i class="fa-solid fa-phone"></i> 7540081247</p>
+                <p><i class="fa-solid fa-envelope"></i> info@ayyatwowheelers.com</p>
+                <p><i class="fa-solid fa-clock"></i> Mon-Sat: 9.30 AM - 9.30 PM</p>
+                <p><i class="fa-solid fa-location-dot"></i> Jeyam complex, Podhumbu main road, Prc colony 2 street, Madurai-18</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 Ayya Two Wheelers Workshop. All rights reserved.</p>
+        </div>
+    </footer>
     <script>
-        const bookingForm = document.querySelector("[data-booking-form]");
+       
+const bookingForm = document.querySelector("[data-booking-form]");
 
-        bookingForm.addEventListener("submit", (event) => {
-            event.preventDefault();
+function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        if (!file || !file.size) {
+            resolve("");
+            return;
+        }
 
-            const formData = new FormData(bookingForm);
-            const message = [
-                "New service booking request",
-                "",
-                `Name: ${formData.get("fullName")}`,
-                `Phone: ${formData.get("phoneNumber")}`,
-                `Pickup location: ${formData.get("pickupLocation")}`,
-                `Bike / scooter model: ${formData.get("bikeModel")}`,
-                `Preferred service: ${formData.get("preferredService")}`,
-                `Preferred date, time, and issue: ${formData.get("serviceDetails")}`
-            ].join("\n");
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Image could not be read"));
+        reader.readAsDataURL(file);
+    });
+}
 
-            const whatsappUrl = `https://wa.me/916383986697?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, "_blank");
+bookingForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(bookingForm);
+    const payload = Object.fromEntries(formData.entries());
+    payload.issueImage = await fileToDataUrl(formData.get("issueImage"));
+    payload.pickupLocation = payload.pickupLocation || "Customer will confirm pickup/location by phone";
+    payload.vehicleBrand = payload.vehicleBrand || "Not specified";
+    payload.bikeModel = payload.bikeModel || payload.serviceDetails;
+    payload.registrationNumber = payload.registrationNumber || "";
+    payload.bookingDate = payload.bookingDate || new Date().toISOString().slice(0, 10);
+    payload.bookingTime = payload.bookingTime || new Date().toTimeString().slice(0, 5);
+
+    try {
+
+        const response = await fetch("http://localhost:5000/api/bookings", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
         });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Booking failed");
+        }
+
+        // Backend success
+        alert(
+            "Booking Successful! ✅\n\n" +
+            "Your Booking ID: " + result.bookingId + "\n" +
+            "Job Card No: " + result.jobCardNo
+        );
+
+        const message = [
+            "New service booking request",
+            "",
+            `Booking ID: ${result.bookingId}`,
+            `Job Card No: ${result.jobCardNo}`,
+            `Name: ${payload.fullName}`,
+            `Phone: ${payload.phoneNumber}`,
+            `Preferred service: ${payload.preferredService}`,
+            `Bike model and service details: ${payload.serviceDetails}`
+        ].join("\n");
+
+        const whatsappUrl =
+            `https://wa.me/916383986697?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappUrl, "_blank");
+        window.open(`job-card.html?bookingId=${encodeURIComponent(result.bookingId)}`, "_blank");
+
+        bookingForm.reset();
+
+    } catch (error) {
+
+        console.error("Booking Error:", error);
+
+        alert(
+            "Booking was NOT saved ❌\n\n" +
+            error.message
+        );
+    }
+});
+
     </script>
     <script src="js/language.js"></script>
 </body>

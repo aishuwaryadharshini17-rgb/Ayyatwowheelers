@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Card | Ayya Two Wheelers Workshop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="job-card-page">
+    <main class="job-card-shell">
+        <section class="job-card">
+            <header class="job-card-header">
+                <div>
+                    <span>Ayya Two Wheelers Workshop</span>
+                    <h1>Customer Service Job Card</h1>
+                    <p>Jeyam complex, Podhumbu main road, Prc colony 2 street, Madurai-18</p>
+                    <p>Phone: 7540081247</p>
+                </div>
+                <div class="job-card-meta">
+                    <strong data-job-card-no>Loading...</strong>
+                    <small>Created: <b data-created-at></b></small>
+                    <small>Completed: <b data-completed-at></b></small>
+                </div>
+            </header>
+
+            <div class="job-card-status">
+                <span>Current Status</span>
+                <strong data-status></strong>
+            </div>
+
+            <div class="job-card-grid">
+                <div>
+                    <small>Booking ID</small>
+                    <strong data-booking-id></strong>
+                </div>
+                <div>
+                    <small>Customer</small>
+                    <strong data-customer-name></strong>
+                </div>
+                <div>
+                    <small>Phone</small>
+                    <strong data-phone></strong>
+                </div>
+                <div>
+                    <small>Vehicle</small>
+                    <strong data-vehicle-model></strong>
+                </div>
+                <div>
+                    <small>Service</small>
+                    <strong data-service></strong>
+                </div>
+            </div>
+
+            <div class="job-card-block">
+                <small>Customer Pickup Location</small>
+                <p data-pickup-location></p>
+            </div>
+
+            <div class="job-card-block">
+                <small>Issue Details Filled by Workshop</small>
+                <p data-problem></p>
+            </div>
+
+            <div class="job-card-images">
+                <div>
+                    <small>Issue Image</small>
+                    <div data-issue-image></div>
+                </div>
+                <div>
+                    <small>Completion Image</small>
+                    <div data-completion-image></div>
+                </div>
+            </div>
+
+            <div class="job-card-block">
+                <small>Work Completion Note</small>
+                <p data-completion-note></p>
+            </div>
+
+            <div class="job-card-note">
+                <strong>Customer Copy</strong>
+                <span>Please keep this job card for service reference. Contact the workshop for any clarification.</span>
+            </div>
+
+            <div class="job-card-signatures">
+                <span>Customer Signature</span>
+                <span>Mechanic Signature</span>
+            </div>
+        </section>
+
+        <div class="job-card-actions">
+            <button type="button" onclick="window.print()">Print / Save PDF</button>
+            <a data-whatsapp-link href="#" target="_blank">Send to Customer</a>
+            <a href="booking.html">Back to Booking</a>
+        </div>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const bookingId = params.get("bookingId");
+        const whatsappLink = document.querySelector("[data-whatsapp-link]");
+
+        function setText(selector, value) {
+            document.querySelector(selector).textContent = value || "-";
+        }
+
+        function formatDate(value) {
+            return value ? new Date(value).toLocaleString() : "-";
+        }
+
+        function cleanPhone(phone) {
+            const digits = String(phone || "").replace(/\D/g, "");
+
+            if (digits.length === 10) {
+                return `91${digits}`;
+            }
+
+            return digits;
+        }
+
+        function customerMessage(jobCard) {
+            return [
+                "Ayya Two Wheelers Workshop - Service Job Card",
+                "",
+                `Job Card No: ${jobCard.job_card_no}`,
+                `Booking ID: ${jobCard.booking_id}`,
+                `Customer: ${jobCard.customer_name}`,
+                `Vehicle: ${jobCard.vehicle_model}`,
+                `Service: ${jobCard.service}`,
+                `Status: ${jobCard.status}`,
+                "",
+                `Issue Details: ${jobCard.problem || "-"}`,
+                `Completion Note: ${jobCard.completion_note || "-"}`,
+                "",
+                "Thank you for choosing Ayya Two Wheelers Workshop."
+            ].join("\n");
+        }
+
+        function setWhatsappLink(jobCard) {
+            const phone = cleanPhone(jobCard.phone);
+            const message = encodeURIComponent(customerMessage(jobCard));
+            whatsappLink.href = phone ? `https://wa.me/${phone}?text=${message}` : `https://wa.me/?text=${message}`;
+        }
+
+        function setImage(selector, path, label) {
+            const container = document.querySelector(selector);
+
+            if (!path) {
+                container.innerHTML = `<div class="job-card-image-empty">${label} not uploaded</div>`;
+                return;
+            }
+
+            container.innerHTML = `<img class="job-card-image" src="http://localhost:5000${path}" alt="${label}">`;
+        }
+
+        async function loadJobCard() {
+            if (!bookingId) {
+                setText("[data-job-card-no]", "Job card not found");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/job-cards/${bookingId}`);
+                const jobCard = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(jobCard.message || "Job card not found");
+                }
+
+                setText("[data-job-card-no]", jobCard.job_card_no);
+                setText("[data-created-at]", formatDate(jobCard.created_at));
+                setText("[data-completed-at]", formatDate(jobCard.completed_at));
+                setText("[data-booking-id]", jobCard.booking_id);
+                setText("[data-status]", jobCard.status);
+                setText("[data-customer-name]", jobCard.customer_name);
+                setText("[data-phone]", jobCard.phone);
+                setText("[data-vehicle-model]", jobCard.vehicle_model);
+                setText("[data-service]", jobCard.service);
+                setText("[data-pickup-location]", jobCard.pickup_location);
+                setText("[data-problem]", jobCard.problem);
+                setText("[data-completion-note]", jobCard.completion_note);
+                setImage("[data-issue-image]", jobCard.issue_image_path, "Issue image");
+                setImage("[data-completion-image]", jobCard.completion_image_path, "Completion image");
+                setWhatsappLink(jobCard);
+            } catch (error) {
+                setText("[data-job-card-no]", error.message);
+            }
+        }
+
+        loadJobCard();
+    </script>
+</body>
+</html>
