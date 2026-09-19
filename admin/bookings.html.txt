@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bookings | AYYA Workshop</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #111;
+            color: white;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .logo-area {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo-area img {
+            width: 65px;
+            margin-bottom: 10px;
+        }
+
+        .logo-area h2 {
+            font-size: 20px;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .menu {
+            flex: 1;
+            margin-top: 18px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scroll-behavior: smooth;
+        }
+
+        .menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .menu::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 20px;
+        }
+
+        .menu a {
+            display: block;
+            padding: 14px 15px;
+            margin-bottom: 8px;
+            color: #ddd;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: #e00000;
+            color: white;
+        }
+
+        .logout {
+            margin-top: 12px;
+        }
+
+        .logout a {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background: #292929;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .logout a:hover {
+            background: #e00000;
+        }
+
+        .side-scroll-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .side-scroll-btn {
+            flex: 1;
+            border: 0;
+            border-radius: 8px;
+            background: #292929;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px;
+        }
+
+        .side-scroll-btn:hover {
+            background: #e00000;
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .topbar h1 {
+            font-size: 28px;
+        }
+
+        .topbar p {
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .admin-name {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* SEARCH */
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .search-box:focus {
+            border-color: #e00000;
+        }
+
+        /* TABLE */
+        .table-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #111;
+            color: white;
+        }
+
+        .status-select {
+            padding: 7px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .view-btn {
+            border: none;
+            padding: 8px 12px;
+            background: #111;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .view-btn:hover {
+            background: #e00000;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+
+        /* MOBILE */
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+            }
+
+            .menu {
+                overflow: visible;
+            }
+
+            .side-scroll-controls {
+                display: none;
+            }
+
+            .logout {
+                margin-top: 20px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo-area">
+
+            <a href="../index.html" aria-label="Go to home page">
+                <img src="../image/logo.png" alt="AYYA Workshop">
+            </a>
+
+            <h2>AYYA WORKSHOP</h2>
+
+            <p>Admin Panel</p>
+
+        </div>
+
+        <div class="side-scroll-controls">
+            <button class="side-scroll-btn" type="button" data-sidebar-scroll="-1">▲</button>
+            <button class="side-scroll-btn" type="button" data-sidebar-scroll="1">▼</button>
+        </div>
+
+        <nav class="menu">
+
+            <a href="dashboard.html">
+                🏠 Dashboard
+            </a>
+
+            <a href="bookings.html" class="active">
+                📅 Bookings
+            </a>
+
+            <a href="job-cards.html">
+                📝 Job Cards
+            </a>
+
+        </nav>
+
+        <div class="logout">
+            <a href="login.html">
+                🚪 Logout
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <div class="topbar">
+
+            <div>
+                <h1>Bookings</h1>
+                <p>Manage customer service bookings</p>
+            </div>
+
+            <div class="admin-name">
+                👤 Yogesh
+            </div>
+
+        </div>
+
+
+        <!-- SEARCH -->
+        <div class="toolbar">
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search-box"
+                placeholder="Search by Booking ID, Customer, Phone or Bike..."
+            >
+
+        </div>
+
+
+        <!-- TABLE -->
+        <div class="table-box">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Pickup Location</th>
+                        <th>Bike</th>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="bookingTable">
+
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            Loading bookings...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        const API_BASE = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+        let allBookings = [];
+
+        // ==================================
+        // LOAD BOOKINGS
+        // ==================================
+
+        async function loadBookings() {
+
+            try {
+
+                const response = await fetch(`${API_BASE}/api/bookings`);
+
+                const data = await response.json();
+
+                const bookings = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data.bookings)
+                        ? data.bookings
+                        : [];
+
+                if (!response.ok || (!Array.isArray(data) && !Array.isArray(data.bookings))) {
+                    throw new Error(data.message || "Failed to load bookings");
+                }
+
+                allBookings = bookings;
+
+                displayBookings(allBookings);
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById("bookingTable").innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            Unable to load bookings.
+                        </td>
+                    </tr>
+                `;
+
+            }
+
+        }
+
+
+        // ==================================
+        // DISPLAY BOOKINGS
+        // ==================================
+
+        function displayBookings(bookings) {
+
+            const table = document.getElementById("bookingTable");
+
+            table.innerHTML = "";
+
+            if (bookings.length === 0) {
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            No bookings found.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+
+            bookings.forEach(booking => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+
+                    <td>
+                        <strong>${booking.booking_id}</strong>
+                    </td>
+
+                    <td>
+                        ${booking.customer_name}
+                    </td>
+
+                    <td>
+                        ${booking.phone}
+                    </td>
+
+                    <td>
+                        ${booking.pickup_location || "-"}
+                    </td>
+
+                    <td>
+                        ${booking.vehicle_model || "-"}
+                    </td>
+
+                    <td>
+                        ${booking.service || "-"}
+                    </td>
+
+                    <td>
+
+                        <select
+                            class="status-select"
+                            onchange="updateStatus(${booking.id}, this.value, this)"
+                        >
+
+                            <option value="Confirmed"
+                                ${booking.status === "Confirmed" ? "selected" : ""}>
+                                Confirmed
+                            </option>
+
+                            <option value="Bike Received"
+                                ${booking.status === "Bike Received" ? "selected" : ""}>
+                                Bike Received
+                            </option>
+
+                            <option value="Inspection"
+                                ${booking.status === "Inspection" ? "selected" : ""}>
+                                Inspection
+                            </option>
+
+                            <option value="In Service"
+                                ${booking.status === "In Service" ? "selected" : ""}>
+                                In Service
+                            </option>
+
+                            <option value="Ready"
+                                ${booking.status === "Ready" ? "selected" : ""}>
+                                Ready
+                            </option>
+
+                            <option value="Completed"
+                                ${booking.status === "Completed" ? "selected" : ""}>
+                                Completed
+                            </option>
+
+                            <option value="Delivered"
+                                ${booking.status === "Delivered" ? "selected" : ""}>
+                                Delivered
+                            </option>
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="view-btn"
+                            onclick="viewBooking(${booking.id})"
+                        >
+                            View
+                        </button>
+
+                    </td>
+
+                `;
+
+                table.appendChild(row);
+
+            });
+
+        }
+
+
+        // ==================================
+        // SEARCH
+        // ==================================
+
+        document.getElementById("searchInput")
+            .addEventListener("input", function() {
+
+                const search = this.value.toLowerCase();
+
+                const filtered = allBookings.filter(booking =>
+
+                    String(booking.booking_id || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                    ||
+
+                    String(booking.customer_name || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                    ||
+
+                    String(booking.phone || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                    ||
+
+                    String(booking.vehicle_model || "")
+                        .toLowerCase()
+                        .includes(search)
+
+                );
+
+                displayBookings(filtered);
+
+            });
+
+
+        // ==================================
+        // UPDATE STATUS
+        // ==================================
+
+        function cleanPhone(phone) {
+            const digits = String(phone || "").replace(/\D/g, "");
+
+            if (digits.length === 10) {
+                return `91${digits}`;
+            }
+
+            return digits;
+        }
+
+        function valueOrDash(value) {
+            return value ? String(value) : "-";
+        }
+
+        async function fetchJobCardDetails(bookingId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/job-cards/${encodeURIComponent(bookingId)}`);
+
+                if (!response.ok) {
+                    return null;
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error(error);
+                return null;
+            }
+        }
+
+        function buildCustomerStatusMessage(booking, status, jobCard) {
+            const lines = [
+                "AYYA Workshop - Booking Update",
+                "",
+                `Dear ${valueOrDash(booking.customer_name)},`,
+                `Your bike service status is updated to: ${status}`,
+                "",
+                `Booking ID: ${valueOrDash(booking.booking_id)}`,
+                `Job Card No: ${valueOrDash(jobCard && jobCard.job_card_no)}`,
+                `Phone: ${valueOrDash(booking.phone)}`,
+                `Vehicle: ${valueOrDash(booking.vehicle_model)}`,
+                `Service: ${valueOrDash(booking.service)}`,
+                `Pickup Location: ${valueOrDash(booking.pickup_location)}`,
+                `Problem/Complaint: ${valueOrDash(booking.problem || (jobCard && jobCard.problem))}`
+            ];
+
+            if (jobCard) {
+                lines.push(
+                    "",
+                    "Job Card Details",
+                    `Job Card Status: ${valueOrDash(jobCard.status)}`,
+                    `Created At: ${valueOrDash(jobCard.created_at)}`
+                );
+            }
+
+            if (status === "Completed" || status === "Delivered" || status === "Ready") {
+                lines.push(
+                    "",
+                    "Service Completion Details",
+                    `Completion Note: ${valueOrDash(jobCard && jobCard.completion_note)}`,
+                    `Completed At: ${valueOrDash(jobCard && jobCard.completed_at)}`
+                );
+            }
+
+            lines.push("", "Thank you for choosing AYYA Workshop.");
+
+            return lines.join("\n");
+        }
+
+        function openCustomerWhatsapp(booking, status, jobCard, shareWindow) {
+            const phone = cleanPhone(booking.phone);
+            const message = encodeURIComponent(buildCustomerStatusMessage(booking, status, jobCard));
+            const url = phone
+                ? `https://wa.me/${phone}?text=${message}`
+                : `https://wa.me/?text=${message}`;
+
+            if (shareWindow && !shareWindow.closed) {
+                shareWindow.location.href = url;
+                return;
+            }
+
+            window.open(url, "_blank");
+        }
+
+        async function updateStatus(id, status, selectElement) {
+
+            const booking = allBookings.find(item => item.id === id);
+            const oldStatus = booking ? booking.status : "";
+            const shareWindow = window.open("", "_blank");
+
+            if (shareWindow) {
+                shareWindow.document.write("<p>Preparing WhatsApp message...</p>");
+            }
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE}/api/bookings/${id}/status`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            status: status
+                        })
+                    }
+                );
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.message || `Status update failed (${response.status})`);
+                }
+
+                if (booking) {
+                    booking.status = status;
+                }
+
+                const jobCard = booking ? await fetchJobCardDetails(booking.booking_id) : null;
+
+                if (booking) {
+                    openCustomerWhatsapp(booking, status, jobCard, shareWindow);
+                } else if (shareWindow && !shareWindow.closed) {
+                    shareWindow.close();
+                }
+
+                alert("Booking status updated successfully. WhatsApp message opened for the customer.");
+
+                loadBookings();
+
+            } catch (error) {
+
+                if (shareWindow && !shareWindow.closed) {
+                    shareWindow.close();
+                }
+
+                if (selectElement) {
+                    selectElement.value = oldStatus || "Confirmed";
+                }
+
+                console.error(error);
+
+                alert(
+                    "Unable to update booking status.\n\n" +
+                    "Please restart backend/server.js and try again.\n" +
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        // ==================================
+        // VIEW BOOKING
+        // ==================================
+
+        function viewBooking(id) {
+
+            const booking = allBookings.find(
+                item => item.id === id
+            );
+
+            if (!booking) return;
+
+            alert(
+                "Booking ID: " + booking.booking_id +
+                "\nCustomer: " + booking.customer_name +
+                "\nPhone: " + booking.phone +
+                "\nPickup: " + (booking.pickup_location || "-") +
+                "\nBike: " + (booking.vehicle_model || "-") +
+                "\nService: " + (booking.service || "-") +
+                "\nProblem: " + (booking.problem || "-") +
+                "\nStatus: " + booking.status
+            );
+
+        }
+
+
+        // Load when page opens
+        loadBookings();
+
+    </script>
+
+    <script>
+        const sidebarMenu = document.querySelector(".menu");
+        document.querySelectorAll("[data-sidebar-scroll]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const direction = Number(button.dataset.sidebarScroll);
+                sidebarMenu.scrollBy({
+                    top: direction * 140,
+                    behavior: "smooth"
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

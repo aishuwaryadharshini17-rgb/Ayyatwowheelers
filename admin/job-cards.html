@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Job Cards | AYYA Workshop</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #111;
+            color: white;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .logo-area {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo-area img {
+            width: 65px;
+            margin-bottom: 10px;
+        }
+
+        .logo-area h2 {
+            font-size: 20px;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .side-scroll-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .side-scroll-btn {
+            flex: 1;
+            border: 0;
+            border-radius: 8px;
+            background: #292929;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px;
+        }
+
+        .side-scroll-btn:hover {
+            background: #e00000;
+        }
+
+        .menu {
+            flex: 1;
+            margin-top: 18px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scroll-behavior: smooth;
+        }
+
+        .menu a {
+            display: block;
+            padding: 14px 15px;
+            margin-bottom: 8px;
+            color: #ddd;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: #e00000;
+            color: white;
+        }
+
+        .logout {
+            margin-top: 12px;
+        }
+
+        .logout a {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background: #292929;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .logout a:hover {
+            background: #e00000;
+        }
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .topbar h1 {
+            font-size: 28px;
+        }
+
+        .topbar p {
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .admin-name {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .job-card-form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 95px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #e00000;
+        }
+
+        .signature-box {
+            min-height: 78px;
+            padding: 12px;
+            display: grid;
+            place-items: center;
+            border: 1px dashed #aaa;
+            border-radius: 8px;
+            color: #777;
+            text-align: center;
+            background: #fafafa;
+            overflow: hidden;
+        }
+
+        .signature-box img {
+            max-width: 260px;
+            max-height: 90px;
+            display: block;
+            object-fit: contain;
+        }
+
+        .image-upload {
+            display: grid;
+            gap: 10px;
+        }
+
+        .image-preview {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border: 1px dashed #aaa;
+            border-radius: 8px;
+            background: #fafafa;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .form-actions button {
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .clear-btn {
+            background: #eee;
+            color: #222;
+        }
+
+        .print-btn {
+            background: #111;
+            color: white;
+        }
+
+        .save-btn {
+            background: #e00000;
+            color: white;
+        }
+
+        .share-btn {
+            background: #25d366;
+            color: white;
+        }
+
+        .form-actions button:hover {
+            opacity: 0.88;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+            }
+
+            .menu {
+                overflow: visible;
+            }
+
+            .side-scroll-controls {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .topbar,
+            .form-actions {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions button {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            .sidebar,
+            .topbar,
+            .form-actions {
+                display: none;
+            }
+
+            body {
+                background: white;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 0;
+            }
+
+            .job-card-form {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="logo-area">
+            <a href="../index.html" aria-label="Go to home page">
+                <img src="../image/logo.png" alt="AYYA Workshop">
+            </a>
+            <h2>AYYA WORKSHOP</h2>
+            <p>Admin Panel</p>
+        </div>
+
+        <div class="side-scroll-controls">
+            <button class="side-scroll-btn" type="button" data-sidebar-scroll="-1">▲</button>
+            <button class="side-scroll-btn" type="button" data-sidebar-scroll="1">▼</button>
+        </div>
+
+        <nav class="menu">
+            <a href="dashboard.html">🏠 Dashboard</a>
+            <a href="bookings.html">📅 Bookings</a>
+            <a href="job-cards.html" class="active">📝 Job Cards</a>
+        </nav>
+
+        <div class="logout">
+            <a href="login.html">🚪 Logout</a>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <div>
+                <h1>Job Card</h1>
+                <p>Fill customer and vehicle service details</p>
+            </div>
+
+            <div class="admin-name">👤 Yogesh</div>
+        </div>
+
+        <form class="job-card-form" id="jobCardForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="customerName">Customer Name</label>
+                    <input type="text" id="customerName" name="customerName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" name="mobileNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="vehicleNumber">Vehicle Number</label>
+                    <input type="text" id="vehicleNumber" name="vehicleNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="vehicleModel">Vehicle Model</label>
+                    <input type="text" id="vehicleModel" name="vehicleModel" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="kmReading">KM Reading</label>
+                    <input type="number" id="kmReading" name="kmReading" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="dateTime">Date & Time</label>
+                    <input type="datetime-local" id="dateTime" name="dateTime">
+                </div>
+
+                <div class="form-group full">
+                    <label for="customerComplaint">Customer Complaint</label>
+                    <textarea id="customerComplaint" name="customerComplaint"></textarea>
+                </div>
+
+                <div class="form-group full">
+                    <label for="inspectionDetails">Vehicle Inspection Details</label>
+                    <textarea id="inspectionDetails" name="inspectionDetails"></textarea>
+                </div>
+
+                <div class="form-group full">
+                    <label for="workToBeDone">Work to be Done</label>
+                    <textarea id="workToBeDone" name="workToBeDone"></textarea>
+                </div>
+
+                <div class="form-group full">
+                    <label for="sparePartsUsed">Spare Parts Used</label>
+                    <textarea id="sparePartsUsed" name="sparePartsUsed"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="beforeImage">Before Image</label>
+                    <div class="image-upload">
+                        <input type="file" id="beforeImage" name="beforeImage" accept="image/*">
+                        <div class="image-preview" id="beforeImagePreview">Before service image</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="afterImage">After Image</label>
+                    <div class="image-upload">
+                        <input type="file" id="afterImage" name="afterImage" accept="image/*">
+                        <div class="image-preview" id="afterImagePreview">After service image</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="labourCharges">Labour Charges</label>
+                    <input type="number" id="labourCharges" name="labourCharges" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="totalAmount">Total Amount</label>
+                    <input type="number" id="totalAmount" name="totalAmount" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentStatus">Payment Status</label>
+                    <select id="paymentStatus" name="paymentStatus">
+                        <option value="">Select status</option>
+                        <option>Pending</option>
+                        <option>Advance Paid</option>
+                        <option>Paid</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="deliveryDate">Delivery Date</label>
+                    <input type="date" id="deliveryDate" name="deliveryDate">
+                </div>
+
+                <div class="form-group full">
+                    <label>Mechanic Signature</label>
+                    <div class="signature-box">Mechanic signature</div>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button class="clear-btn" type="reset">Clear</button>
+                <button class="print-btn" type="button" onclick="window.print()">Print</button>
+                <button class="share-btn" type="button" id="shareWhatsappBtn">WhatsApp Share</button>
+                <button class="save-btn" type="submit">Save Job Card</button>
+            </div>
+        </form>
+
+    </main>
+
+    <script>
+        const API_BASE = window.location.protocol === "file:" ? "http://localhost:5000" : "";
+        const lastSavedJobCard = {
+            payload: null,
+            jobCardNo: "",
+            bookingId: ""
+        };
+        const sidebarMenu = document.querySelector(".menu");
+        document.querySelectorAll("[data-sidebar-scroll]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const direction = Number(button.dataset.sidebarScroll);
+                sidebarMenu.scrollBy({
+                    top: direction * 140,
+                    behavior: "smooth"
+                });
+            });
+        });
+
+        function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve("");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function setupImagePreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener("change", async () => {
+                const file = input.files[0];
+
+                if (!file) {
+                    preview.textContent = inputId === "beforeImage" ? "Before service image" : "After service image";
+                    return;
+                }
+
+                const dataUrl = await fileToDataUrl(file);
+                preview.innerHTML = `<img src="${dataUrl}" alt="">`;
+            });
+        }
+
+        setupImagePreview("beforeImage", "beforeImagePreview");
+        setupImagePreview("afterImage", "afterImagePreview");
+
+        function cleanPhone(phone) {
+            const digits = String(phone || "").replace(/\D/g, "");
+
+            if (digits.length === 10) {
+                return `91${digits}`;
+            }
+
+            return digits;
+        }
+
+        function formatValue(value) {
+            return value ? String(value) : "-";
+        }
+
+        function buildJobCardMessage(payload, jobCardNo, bookingId) {
+            return [
+                "AYYA Workshop - Service Job Card",
+                "",
+                `Job Card No: ${jobCardNo}`,
+                `Booking ID: ${bookingId}`,
+                `Customer: ${formatValue(payload.customerName)}`,
+                `Mobile: ${formatValue(payload.mobileNumber)}`,
+                `Vehicle No: ${formatValue(payload.vehicleNumber)}`,
+                `Vehicle Model: ${formatValue(payload.vehicleModel)}`,
+                `KM Reading: ${formatValue(payload.kmReading)}`,
+                `Date & Time: ${formatValue(payload.dateTime)}`,
+                "",
+                `Customer Complaint: ${formatValue(payload.customerComplaint)}`,
+                `Inspection Details: ${formatValue(payload.inspectionDetails)}`,
+                `Work to be Done: ${formatValue(payload.workToBeDone)}`,
+                `Spare Parts Used: ${formatValue(payload.sparePartsUsed)}`,
+                "",
+                `Labour Charges: ${formatValue(payload.labourCharges)}`,
+                `Total Amount: ${formatValue(payload.totalAmount)}`,
+                `Payment Status: ${formatValue(payload.paymentStatus)}`,
+                `Delivery Date: ${formatValue(payload.deliveryDate)}`,
+                "",
+                "Thank you for choosing AYYA Workshop."
+            ].join("\n");
+        }
+
+        function whatsappShareUrl(payload, jobCardNo, bookingId) {
+            const phone = cleanPhone(payload.mobileNumber);
+            const message = encodeURIComponent(buildJobCardMessage(payload, jobCardNo, bookingId));
+
+            return phone
+                ? `https://wa.me/${phone}?text=${message}`
+                : `https://wa.me/?text=${message}`;
+        }
+
+        function openWhatsappShare(payload, jobCardNo, bookingId, shareWindow) {
+            const whatsappUrl = whatsappShareUrl(payload, jobCardNo, bookingId);
+
+            if (shareWindow && !shareWindow.closed) {
+                shareWindow.location.href = whatsappUrl;
+                return;
+            }
+
+            window.open(whatsappUrl, "_blank");
+        }
+
+        function escapeDocText(value) {
+            return String(value || "-")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function jobCardRow(label, value) {
+            return `
+                <tr>
+                    <th>${escapeDocText(label)}</th>
+                    <td>${escapeDocText(value)}</td>
+                </tr>
+            `;
+        }
+
+        function downloadJobCardDoc(payload, jobCardNo, bookingId) {
+            const rows = [
+                ["Job Card No", jobCardNo],
+                ["Booking ID", bookingId],
+                ["Customer Name", payload.customerName],
+                ["Mobile Number", payload.mobileNumber],
+                ["Vehicle Number", payload.vehicleNumber],
+                ["Vehicle Model", payload.vehicleModel],
+                ["KM Reading", payload.kmReading],
+                ["Date & Time", payload.dateTime],
+                ["Customer Complaint", payload.customerComplaint],
+                ["Vehicle Inspection Details", payload.inspectionDetails],
+                ["Work to be Done", payload.workToBeDone],
+                ["Spare Parts Used", payload.sparePartsUsed],
+                ["Labour Charges", payload.labourCharges],
+                ["Total Amount", payload.totalAmount],
+                ["Payment Status", payload.paymentStatus],
+                ["Delivery Date", payload.deliveryDate]
+            ].map(([label, value]) => jobCardRow(label, value)).join("");
+
+            const docHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${escapeDocText(jobCardNo)}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; color: #222; }
+                        h1 { margin-bottom: 4px; }
+                        p { margin-top: 0; color: #555; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+                        th, td { border: 1px solid #bbb; padding: 10px; text-align: left; vertical-align: top; }
+                        th { width: 32%; background: #f2f2f2; }
+                        .signature { width: 50%; margin-top: 50px; border-top: 1px solid #333; padding-top: 8px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>AYYA Workshop - Service Job Card</h1>
+                    <p>Jeyam complex, Podhumbu main road, Prc colony 2 street, Madurai-18 | Phone: 7540081247</p>
+                    <table>${rows}</table>
+                    <div class="signature">Mechanic Signature</div>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(["\ufeff", docHtml], {
+                type: "application/msword"
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${jobCardNo}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            URL.revokeObjectURL(link.href);
+            link.remove();
+        }
+
+        document.getElementById("shareWhatsappBtn").addEventListener("click", () => {
+            if (!lastSavedJobCard.payload) {
+                alert("Please save the job card first. Then WhatsApp share will be ready.");
+                return;
+            }
+
+            openWhatsappShare(
+                lastSavedJobCard.payload,
+                lastSavedJobCard.jobCardNo,
+                lastSavedJobCard.bookingId
+            );
+        });
+
+        document.getElementById("jobCardForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const form = event.currentTarget;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            payload.beforeImage = await fileToDataUrl(document.getElementById("beforeImage").files[0]);
+            payload.afterImage = await fileToDataUrl(document.getElementById("afterImage").files[0]);
+            const shareWindow = window.open("", "_blank");
+
+            if (shareWindow) {
+                shareWindow.document.write("<p>Preparing WhatsApp share...</p>");
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/job-cards`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    if (shareWindow && !shareWindow.closed) {
+                        shareWindow.close();
+                    }
+                    alert(data.message || "Unable to save job card.");
+                    return;
+                }
+
+                lastSavedJobCard.payload = { ...payload };
+                lastSavedJobCard.jobCardNo = data.jobCardNo;
+                lastSavedJobCard.bookingId = data.bookingId;
+
+                downloadJobCardDoc(payload, data.jobCardNo, data.bookingId);
+                openWhatsappShare(payload, data.jobCardNo, data.bookingId, shareWindow);
+
+                alert(`Job card saved successfully. Job Card No: ${data.jobCardNo}. Document downloaded and WhatsApp share opened.`);
+                form.reset();
+            } catch (error) {
+                if (shareWindow && !shareWindow.closed) {
+                    shareWindow.close();
+                }
+                console.error(error);
+                alert("Unable to save job card.");
+            }
+        });
+    </script>
+
+</body>
+</html>
